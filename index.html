@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lucky Six Smart Generator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- ✅ Bootstrap Icons CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: url('1.png') no-repeat center center fixed;
+      background-size: cover;
+    }
+    .overlay {
+      background: rgba(0,0,0,0.6);
+      min-height: 100vh;
+    }
+
+    /* 🎲 Glowing Balls */
+    .ball {
+      display:inline-flex;
+      justify-content:center;
+      align-items:center;
+      width:41px;
+      height:41px;
+      border-radius:50%;
+      color:white;
+      font-weight:bold;
+      font-size:15px;
+      margin:4px;
+      animation: pop 0.4s ease, glow 1.5s infinite alternate;
+    }
+    .ball.red {
+      background: radial-gradient(circle at 30% 30%, #ff4d4d, #b30000);
+      box-shadow:0 0 15px rgba(255,77,77,0.8), 0 0 30px rgba(179,0,0,0.6);
+    }
+    .ball.blue {
+      background: radial-gradient(circle at 30% 30%, #60a5fa, #1e3a8a);
+      box-shadow:0 0 15px rgba(96,165,250,0.8), 0 0 30px rgba(37,99,235,0.6);
+    }
+    .ball.gray {
+      background: radial-gradient(circle at 30% 30%, #cccccc, #666666);
+      box-shadow:0 0 15px rgba(200,200,200,0.8), 0 0 30px rgba(100,100,100,0.6);
+    }
+
+    @keyframes pop { 0% {transform: scale(0);} 100% {transform: scale(1);} }
+    @keyframes glow {
+      from { box-shadow:0 0 10px rgba(96,165,250,0.6), 0 0 20px rgba(37,99,235,0.4); }
+      to { box-shadow:0 0 25px rgba(96,165,250,1), 0 0 45px rgba(37,99,235,0.9); }
+    }
+
+    /* Pair Tiles */
+    .pair-tile {
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 10px;
+      margin: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      transition: transform 0.3s ease;
+    }
+    .pair-tile:hover { transform: scale(1.05); }
+  </style>
+</head>
+
+<body>
+<div class="overlay text-gray-100">
+
+  <!-- Navbar -->
+  <header class="bg-gray-900/90 text-white p-4 flex justify-between backdrop-blur">
+    <h1 class="font-bold text-lg">🎯 Lucky Six</h1>
+    <nav class="space-x-4 text-sm flex items-center">
+      <a href="index.html" class="hover:text-blue-300">Home</a>
+      <a href="about.html" class="hover:text-blue-300">About</a>
+      <a href="terms.html" class="hover:text-blue-300">Terms</a>
+      <a href="legal.html" class="hover:text-blue-300">Legal</a>
+      
+    </nav>
+  </header>
+
+  <div class="max-w-5xl mx-auto p-6">
+
+    <!-- Hero -->
+    <div class="bg-white/10 backdrop-blur p-6 rounded-2xl shadow mb-6 text-center">
+      <h2 class="text-2xl font-bold mb-2">Lucky Six Smart Predictor</h2>
+      <p class="text-gray-200">History + Probability Pair Generator</p>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid md:grid-cols-3 gap-6">
+
+      <!-- Generator -->
+      <div class="bg-white/10 backdrop-blur p-6 rounded-2xl shadow md:col-span-2 text-center flex flex-col items-center">
+        <h3 class="font-semibold mb-3">Enter the Recent Pair</h3>
+
+        <div class="flex gap-2 mb-4">
+          <input id="n1" type="number" placeholder="Enter Result 1" class="w-24 p-2 border rounded text-black" min="0" max="9">
+          <input id="n2" type="number" placeholder="Enter Result 2" class="w-24 p-2 border rounded text-black" min="0" max="9">
+        </div>
+
+        <button onclick="generate()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
+          Generate
+        </button>
+
+        <!-- 🎲 Pair Tiles Output -->
+        <div id="result" class="mt-4 flex flex-wrap justify-center"></div>
+      </div>
+
+      <!-- History -->
+      <div class="bg-white/10 backdrop-blur p-6 rounded-2xl shadow">
+        <h3 class="text-xl font-semibold mb-3">History</h3>
+        <ul id="historyList" class="text-sm space-y-1"></ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="text-center text-xs p-4 text-gray-300 flex justify-center items-center gap-4">
+    <span>Designed by Solly Bombe | This tool does not guarantee winning results.</span>
+    <!-- ✅ Social Icons in Footer -->
+    <a href="https://www.facebook.com/solly.bombe.2025" target="_blank" class="hover:text-blue-400">
+      <i class="bi bi-facebook text-lg"></i>
+    </a>
+    <a href="https://www.linkedin.com/in/solly-bombe-4884a6177/" target="_blank" class="hover:text-blue-400">
+      <i class="bi bi-linkedin text-lg"></i>
+    </a>
+    <a href="https://x.com/SollyBombe" target="_blank" class="hover:text-blue-400">
+      <i class="bi bi-twitter-x text-lg"></i>
+    </a>
+  </footer>
+
+</div>
+
+<script>
+function getBallColor(num) {
+  if ([1,2,5,6,9].includes(num)) return 'red';
+  if ([0,3,4,7,8].includes(num)) return 'blue';
+  return 'gray';
+}
+
+function generate() {
+  const entered1 = parseInt(document.getElementById("n1").value);
+  const entered2 = parseInt(document.getElementById("n2").value);
+  const exclude = [entered1, entered2].filter(n => !isNaN(n));
+
+  let pairs = [];
+  while(pairs.length < 10) {
+    let a, b;
+    do { a = Math.floor(Math.random() * 10); } while (exclude.includes(a));
+    do { b = Math.floor(Math.random() * 10); } while (exclude.includes(b));
+    pairs.push([a, b]);
+  }
+
+  // 🎲 Create tiles with glowing balls
+  let tilesHTML = '';
+  pairs.forEach((p, idx) => {
+    tilesHTML += `
+      <div class="pair-tile">
+        <span class="text-xs text-gray-300 mr-2">Pair ${idx+1}</span>
+        <div class="ball ${getBallColor(p[0])}">${p[0]}</div>
+        <div class="ball ${getBallColor(p[1])}">${p[1]}</div>
+      </div>
+    `;
+  });
+
+  document.getElementById("result").innerHTML = tilesHTML;
+
+  // ✅ History now only stores the entered numbers
+  if (!isNaN(entered1) && !isNaN(entered2)) {
+    let li = document.createElement("li");
+    li.innerText = `${entered1}, ${entered2}`;
+    document.getElementById("historyList").prepend(li);
+  }
+}
+</script>
+
+</body>
+</html>
